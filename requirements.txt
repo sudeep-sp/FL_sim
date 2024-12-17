@@ -1,0 +1,8 @@
+flwr[simulation]
+flwr-datasets[vision] 
+torch 
+torchvision 
+matplotlib
+streamlit
+hydra-core
+ray
