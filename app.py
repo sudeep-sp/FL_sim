@@ -3,7 +3,6 @@ import re
 import streamlit as st
 import os
 import subprocess
-import time
 from datetime import datetime
 import matplotlib.pyplot as plt
 from dataset import load_datasets
