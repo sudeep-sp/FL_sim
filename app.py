@@ -133,7 +133,7 @@ st.header("Simulation Metrics")
 summary_input = st.text_area(
     "Paste the summary log below (e.g., `[SUMMARY]`)", height=150)
 
-if st.button("Parse Summary"):
+if st.button("Visualize"):
     if summary_input.strip():
         exec_time, distributed_losses, centralized_losses, global_accuracy = parse_summary(
             summary_input
@@ -200,3 +200,5 @@ if st.button("Parse Summary"):
 
     else:
         st.error("Please paste the summary log to parse.")
+
+st.write("🛠️ built with by Sudeep")
