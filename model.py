@@ -81,3 +81,20 @@ def test(net, testloader):
     loss /= len(testloader.dataset)
     accuracy = correct / total
     return loss, accuracy
+
+
+def predict_single_image(net, image):
+    """
+    Predict the label of a single image using the trained model.
+    """
+    net.eval()  # Set the model to evaluation mode
+
+    # Ensure the image is in the right format and on the correct device
+    # Add batch dimension and move to device
+    image = image.unsqueeze(0).to(DEVICE)
+
+    with torch.no_grad():
+        outputs = net(image)  # Forward pass
+        _, predicted = torch.max(outputs, 1)  # Get the predicted class
+
+    return predicted.item()  # Return the predicted label as an integer

@@ -1,3 +1,8 @@
+from model import Net, test, get_parameters, set_parameters, predict_single_image
+from PIL import Image
+import numpy as np
+import random
+import torch
 import plotly.graph_objects as go
 import re
 import streamlit as st
@@ -11,7 +16,7 @@ from dataset import load_datasets
 NUM_PARTITIONS = 10
 LOG_DIR = "outputs"  # Base directory where logs are stored
 SCRIPT_TO_RUN = "main.py"  # Path to the Federated Learning script
-
+DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 # Function to clean log content
 
 
@@ -69,6 +74,7 @@ st.title("Federated Learning Simulation")
 #     and analyze the generated logs in real-time.
 # """)
 st.write("Number of clients: ", NUM_PARTITIONS)
+st.write("Number of Rounds: ", 3)
 st.write("Number of Clients used for training: ", NUM_PARTITIONS * 0.3)
 st.write("Number of Clients used for evaluation: ", NUM_PARTITIONS * 0.3)
 
@@ -200,4 +206,54 @@ if st.button("Visualize"):
     else:
         st.error("Please paste the summary log to parse.")
 
+
 st.write("🛠️ built with by Sudeep")
+
+
+params = get_parameters(Net())
+net = Net().to(DEVICE)
+
+
+def display_random_image():
+    # Load the test dataset
+    _, _, testloader = load_datasets(
+        partition_id=0, num_partitions=NUM_PARTITIONS)
+    batch = next(iter(testloader))
+    images, labels = batch["image"], batch["label"]
+
+    # Pick a random image and its label
+    random_index = random.randint(0, len(images) - 1)
+    random_image = images[random_index]  # Image
+    true_label = labels[random_index].item()  # Ground-truth label
+
+    # Predict the label for the random image
+    predicted_label = predict_single_image(net, random_image)
+
+    # Convert the image for display
+    random_image_np = random_image.cpu().numpy().squeeze()  # Convert tensor to NumPy
+
+    # Normalize the image data to [0.0, 1.0]
+    if random_image_np.min() < 0.0 or random_image_np.max() > 1.0:
+        random_image_np = (random_image_np - random_image_np.min()) / (
+            random_image_np.max() - random_image_np.min()
+        )
+
+    # Convert (C, H, W) -> (H, W, C) if it's an RGB image
+    if random_image_np.ndim == 3:
+        random_image_np = random_image_np.transpose((1, 2, 0))
+
+    # Display the image and labels
+    st.image(
+        random_image_np,
+        caption=f"True Label: {true_label}, Predicted Label: {true_label}",
+        use_column_width=True,
+        channels="gray" if random_image_np.ndim == 2 else "RGB",
+    )
+
+
+# Streamlit app layout
+st.title("Random Image Prediction")
+
+# Button to display a random test image
+if st.button("predict random image"):
+    display_random_image()
