@@ -7,21 +7,21 @@ BATCH_SIZE = 32
 
 
 def load_datasets(partition_id: int, num_partitions: int):
-    fds = FederatedDataset(dataset="cifar10", partitioners={
+    fds = FederatedDataset(dataset="ylecun/mnist", partitioners={
                            "train": num_partitions})
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     pytorch_transforms = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize(
-            (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+            (0.1307,), (0.3081,))]
     )
 
     def apply_transforms(batch):
         # Instead of passing transforms to CIFAR10(..., transform=transform)
         # we will use this function to dataset.with_transform(apply_transforms)
         # The transforms object is exactly the same
-        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+        batch["image"] = [pytorch_transforms(img) for img in batch["image"]]
         return batch
 
     partition_train_test = partition_train_test.with_transform(
